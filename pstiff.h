@@ -63,7 +63,9 @@ namespace PsTiff
             PrintFlags,
             Iptc,
             CaptionDigest,
-            PathInformation
+            PathInformation,
+            PrintInformation,
+            PrintStyle
         };
         struct Range_t {
             int from;

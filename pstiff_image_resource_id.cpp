@@ -204,10 +204,10 @@ namespace PsTiff
             // (Photoshop CS5) Print Information. 4 bytes (descriptor version = 16), 
             // Descriptor (see See Descriptor structure) Information about the current print settings in the document. 
             // The color management options.
-            {Unsupported,{ 1082, 1082}},
+            {PrintInformation,{ 1082, 1082}},
             // (Photoshop CS5) Print Style. 4 bytes (descriptor version = 16), Descriptor (see See Descriptor structure) 
             // Information about the current print style in the document. The printing marks, labels, ornaments, etc.
-            {Unsupported,{ 1083, 1083}},
+            {PrintStyle,{ 1083, 1083}},
             // (Photoshop CS5) Macintosh NSPrintInfo. Variable OS specific info for Macintosh. NSPrintInfo. 
             // It is recommened that you do not interpret or use this data.
             {Unsupported,{ 1084, 1084}},
@@ -282,7 +282,8 @@ namespace PsTiff
             {Iptc,"Iptc"},
             {CaptionDigest,"CaptionDiges"},
             {PathInformation,"PathInformation"},
-
+            {PrintInformation,"PrintInformation"},
+            {PrintStyle,"PrintStyle"}
         };
 
         if(n.empty()) {

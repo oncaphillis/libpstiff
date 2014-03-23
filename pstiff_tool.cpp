@@ -75,34 +75,35 @@ void _Error(const char* module, const char* fmt, va_list ap)
 
 typedef unsigned char byte_t;
 
-void ParsePhotoshop(const byte_t * p,int n)
-
-{
+void ParsePhotoshop(const byte_t * p,int n,std::ostream &os=std::cout) {
     const byte_t *p0=p;
+
     while(p<p0+n) {
-        std::string sig = std::string((char*)p,4);
+        if(std::string((char*)p,4)!="8BIM")
+            throw std::runtime_error("expected '8BIM' signature");
+
+        
         uint16_t     id  = ((uint16_t) *(p+4) << 8 | *(p+5));
         std::string name= std::string((char*)p+7,(int)*(p+6));
-
-        std::cerr << "'" << sig << "' [";
-        std::cerr << std::setw(4) << std::setfill('0')
-                  << PsTiff::ImageResourceId(id).ToString() <<  "] '" << name << "'";
-
+        
+        os << std::setw(4) << std::setfill('0')
+           << PsTiff::ImageResourceId(id).ToString() <<  "] '" << name << "'";
+        
         p += name.length() & 0x1 != 0x0 ? 7+name.length(): 8+name.length();
 
         uint32_t s = (uint32_t)*(p+0) << 24 |(uint32_t)*(p+1)<<16
-                   | (uint32_t)*(p+2) <<  8 |(uint32_t)*(p+3)<<0;
-
-        std::cerr << "[" << std::hex << s << std::dec << "]" << std::endl;
+            | (uint32_t)*(p+2) <<  8 |(uint32_t)*(p+3)<<0;
         
-        std::cerr << PsTiff::IO::hex_dump(std::string( (char*) (p+sizeof(uint32_t)),s)) << std::endl;
+        os << "[" << s << "]" << std::endl;
+        
+        os << PsTiff::IO::hex_dump(std::string( (char*) (p+sizeof(uint32_t)),s)) << std::endl;
         
         p+=sizeof(uint32_t) + ((s & 0x1) == 0 ? s : s+1);
         
 
-        std::cerr << "*******************************************"   << std::endl;
+        os << "*******************************************"   << std::endl;
     }
-
+    
     if(p-p0 != n) {
         throw std::runtime_error("failed to parse PostScript Tag");
     }
@@ -111,13 +112,7 @@ void ParsePhotoshop(const byte_t * p,int n)
 
 static const std::string Usage = "Usage: pstiff_dump tiff-file";
 
-int main(int argc, char* argv[])
-{
-    {
-        PsTiff::ImageResourceId i(2005);
-        std::cerr << "#" << i.ToString() << std::endl;
-    }
-
+int main(int argc, char* argv[]) {
     TIFF *in, *out;
 
     TIFFSetErrorHandler(_Error);
@@ -139,8 +134,7 @@ int main(int argc, char* argv[])
             int n;
             byte_t *data;
             if(TIFFGetField(in,TIFFTAG_PHOTOSHOP,&n,&data)==1) {
-                std::cerr << "N=" << n << std::endl;
-                ParsePhotoshop(data,n);
+                ParsePhotoshop(data,n,std::cout);
             }
         }
         n++;

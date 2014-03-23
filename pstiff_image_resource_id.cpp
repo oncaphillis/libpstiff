@@ -280,7 +280,7 @@ namespace PsTiff
             {PluginResources,"PluginResources"},
             {PrintFlags,"PrintFlags"},
             {Iptc,"Iptc"},
-            {CaptionDigest,"CaptionDiges"},
+            {CaptionDigest,"CaptionDigest"},
             {PathInformation,"PathInformation"},
             {PrintInformation,"PrintInformation"},
             {PrintStyle,"PrintStyle"}

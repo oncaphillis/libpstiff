@@ -1,0 +1,32 @@
+** libpstiff ** 
+
+A library for Adobe Photoshop specific TIFF Data.
+
+Born to support me  in my attempt to  generate  TIFFs with spot  color
+channels.
+
+TIFF files  generated  by Adobe Photoshop seem  to  be  the only  pure
+bitnap format on  this  planet that supports   spot color channels  in
+addition to the usual RGBA and CMYK stuff.
+
+Adobe uses a couple  of Image Resource  Blocks stuffed into a  private
+"Photoshop" Tag to store the extra information.
+
+See:
+
+http://www.adobe.com/devnet-apps/photoshop/fileformatashtml/#50577413_pgfId-1035272
+
+
+In a first attempt my  code tries to make  sense of the Image Resource
+Ids  stored in the private  TAG.
+
+The  ultimate target is to  genarete  TIFFS with additional spot color
+channels which are properyly interpreted by Photoshop.
+
+Changes do far:
+
+* pstiff_tool  parses  thru the Image   Resource  Blocks and dumps out
+  minimal information for each ID it finds.
+
+ 
+Sebastian Kloska (oncaphillis@snafu.de)

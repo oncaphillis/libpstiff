@@ -30,6 +30,7 @@
 #include <iomanip>
 #include <string>
 #include <stdexcept>
+#include <pstiff/io/hex_dump.h>
 
 static
 void _Warning(const char* module, const char* fmt, va_list ap)
@@ -75,6 +76,7 @@ void _Error(const char* module, const char* fmt, va_list ap)
 typedef unsigned char byte_t;
 
 void ParsePhotoshop(const byte_t * p,int n)
+
 {
     const byte_t *p0=p;
     while(p<p0+n) {
@@ -90,8 +92,14 @@ void ParsePhotoshop(const byte_t * p,int n)
 
         uint32_t s = (uint32_t)*(p+0) << 24 |(uint32_t)*(p+1)<<16
                    | (uint32_t)*(p+2) <<  8 |(uint32_t)*(p+3)<<0;
+
         std::cerr << "[" << std::hex << s << std::dec << "]" << std::endl;
+        
+        std::cerr << PsTiff::IO::hex_dump(std::string( (char*) (p+sizeof(uint32_t)),s)) << std::endl;
+        
         p+=sizeof(uint32_t) + ((s & 0x1) == 0 ? s : s+1);
+        
+
         std::cerr << "*******************************************"   << std::endl;
     }
 

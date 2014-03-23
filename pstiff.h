@@ -19,7 +19,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 //
 //========================================================================
-
 #ifndef PSTIFF_H
 #define PSTIFF_H
 

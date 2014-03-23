@@ -6,7 +6,7 @@ Born to support me  in my attempt to  generate  TIFFs with spot  color
 channels.
 
 TIFF files  generated  by Adobe Photoshop seem  to  be  the only  pure
-bitnap format on  this  planet that supports   spot color channels  in
+bitmap format on  this  planet that supports   spot color channels  in
 addition to the usual RGBA and CMYK stuff.
 
 Adobe uses a couple  of Image Resource  Blocks stuffed into a  private

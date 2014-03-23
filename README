@@ -18,10 +18,10 @@ http://www.adobe.com/devnet-apps/photoshop/fileformatashtml/#50577413_pgfId-1035
 
 
 In a first attempt my  code tries to make  sense of the Image Resource
-Ids  stored in the private  TAG.
+Ids  stored in the private "Photoshop" TIFF TAG.
 
-The  ultimate target is to  genarete  TIFFS with additional spot color
-channels which are properyly interpreted by Photoshop.
+The  ultimate target is to  generate TIFFs  with additional spot color
+channels which are properly interpreted by Photoshop.
 
 Changes do far:
 

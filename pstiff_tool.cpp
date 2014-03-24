@@ -37,20 +37,18 @@
 static
 void _Warning(const char* module, const char* fmt, va_list ap) {
     std::stringstream ss;
-    ss  << "## warning" << std::endl;
+    ss  << "## warning:";
+
     if (module != NULL)
         ss << module << ":";
 
-#if 0
-    vsprintf(e+strlen(e), fmt, ap);
-    strcat(e, ".");
-    if (Verbose) {
+    static const int n=100;
+    static char b[n];
 
-        fprintf(stderr, "\nWarning");
-        fprintf(stderr, " %s\n", e);
-        fflush(stderr);
-    }
-#endif
+    if(vsnprintf(b, n,fmt, ap)>=n)
+        ss << b << "...";
+    else
+        ss << b;;
 
     std::cerr << ss.str() << std::endl;
 }
@@ -61,16 +59,15 @@ void _Error(const char* module, const char* fmt, va_list ap)
     std::stringstream ss;
     ss << " ## error:";
 
-    if (module != NULL) 
+    if (module != NULL)
         ss << module << ":";
-    
-#if 0
-    vsprintf(e+strlen(e), fmt, ap);
-    strcat(e, ".");
-    fprintf(stderr, "\nError");
-    fprintf(stderr, " %s\n", e);
-    fflush(stderr);
-#endif 
+    static const int n=100;
+    static char b[n];
+
+    if(vsnprintf(b, n,fmt, ap)>=n)
+        ss << b << "...";
+    else
+        ss << b;;
 
     std::cerr << ss.str() << std::endl;
 }
@@ -111,6 +108,24 @@ void ParsePhotoshop(const byte_t * p,int n,std::ostream &os=std::cout) {
     }
 }
 
+void ParsePhotoshopDDB(const byte_t * p,int n,std::ostream &os=std::cout) {
+    const byte_t *p0=p;
+    std::string s((char*)p);
+    p+=s.length()+1;
+
+    std::string t;
+    t+=p[3]; t+=p[2]; t+=p[1]; t+=p[0];
+
+    std::string i;
+    i+=p[7]; i+=p[6]; i+=p[5]; i+=p[4];
+    
+    p+=8;
+
+    uint32_t nn =  (uint32_t)p[0] |  (uint32_t)p[1] << 8 |  (uint32_t)p[2] << 16 |  (uint32_t)p[3] << 24;  
+
+    os << s << "[" << t << "|" << i << "]::" << nn << std::endl;
+}
+
 
 static const std::string Usage = "Usage: pstiff_dump tiff-file";
 
@@ -122,7 +137,7 @@ int main(int argc, char* argv[]) {
 
     if(argc!=2)
         std::cerr << Usage << std::endl;
-
+    
     if((in = TIFFOpen(argv[1], "r"))==NULL)
     {
         std::cerr << "Unable to open '" << argv[1] << "'" << std::endl;
@@ -135,21 +150,24 @@ int main(int argc, char* argv[]) {
         {
             int n;
             byte_t *data;
-            
+
             if(TIFFGetField(in,TIFFTAG_PHOTOSHOP,&n,&data)==1) {
                 ParsePhotoshop(data,n,std::cout);
             }
+#if 0
             if(TIFFGetField(in,TIFFTAG_PHOTOSHOP_DDB,&n,&data)==1) {
-                std::cout << "DDB" << n << std::endl
+                std::cout << "DDB::" << n << std::endl
                           << PsTiff::IO::hex_dump(data,n)
                           << std::endl;
+                ParsePhotoshopDDB(data,n);
             }
+
             if(TIFFGetField(in,TIFFTAG_XMLPACKET,&n,&data)==1) {
                 std::cout << "XMP" << n << std::endl
                           << std::string((char*)data,n)
                           << std::endl;
-
             }
+#endif
         }
         n++;
     } while (TIFFReadDirectory(in));

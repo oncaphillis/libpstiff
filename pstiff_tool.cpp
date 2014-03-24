@@ -32,6 +32,8 @@
 #include <stdexcept>
 #include <pstiff/io/hex_dump.h>
 
+#define TIFFTAG_PHOTOSHOP_DDB 37724
+
 static
 void _Warning(const char* module, const char* fmt, va_list ap)
 {
@@ -133,8 +135,20 @@ int main(int argc, char* argv[]) {
         {
             int n;
             byte_t *data;
+            
             if(TIFFGetField(in,TIFFTAG_PHOTOSHOP,&n,&data)==1) {
                 ParsePhotoshop(data,n,std::cout);
+            }
+            if(TIFFGetField(in,TIFFTAG_PHOTOSHOP_DDB,&n,&data)==1) {
+                std::cout << "DDB" << n << std::endl
+                          << PsTiff::IO::hex_dump(data,n)
+                          << std::endl;
+            }
+            if(TIFFGetField(in,TIFFTAG_XMLPACKET,&n,&data)==1) {
+                std::cout << "XMP" << n << std::endl
+                          << std::string((char*)data,n)
+                          << std::endl;
+
             }
         }
         n++;

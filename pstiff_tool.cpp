@@ -33,14 +33,13 @@
 #include <pstiff/io/hex_dump.h>
 
 static
-void _Warning(const char* module, const char* fmt, va_list ap)
-{
-    std::cerr << "## warning" << std::endl;
-#if 0
-    char e[512] = { '\0' };
+void _Warning(const char* module, const char* fmt, va_list ap) {
+    std::stringstream ss;
+    ss  << "## warning" << std::endl;
     if (module != NULL)
-        strcat(strcpy(e, module), ": ");
+        ss << module << ":";
 
+#if 0
     vsprintf(e+strlen(e), fmt, ap);
     strcat(e, ".");
     if (Verbose) {
@@ -50,27 +49,28 @@ void _Warning(const char* module, const char* fmt, va_list ap)
         fflush(stderr);
     }
 #endif
+
+    std::cerr << ss.str() << std::endl;
 }
 
 static
 void _Error(const char* module, const char* fmt, va_list ap)
 {
-    std::cerr << " ## error" << std::endl;
+    std::stringstream ss;
+    ss << " ## error:";
 
+    if (module != NULL) 
+        ss << module << ":";
+    
 #if 0
-    char e[512] = { '\0' };
-
-    if (module != NULL) {
-        if (strlen(module) < 500)
-               strcat(strcpy(e, module), ": ");
-    }
-
     vsprintf(e+strlen(e), fmt, ap);
     strcat(e, ".");
     fprintf(stderr, "\nError");
     fprintf(stderr, " %s\n", e);
     fflush(stderr);
-#endif
+#endif 
+
+    std::cerr << ss.str() << std::endl;
 }
 
 typedef unsigned char byte_t;

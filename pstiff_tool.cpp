@@ -74,33 +74,24 @@ void _Error(const char* module, const char* fmt, va_list ap)
 
 typedef unsigned char byte_t;
 
-void ParsePhotoshop(const byte_t * p,int n,std::ostream &os=std::cout) {
-    const byte_t *p0=p;
+
+void ParsePhotoshop(const PsTiff::Byte_t * p,int n,std::ostream &os=std::cout) {
+
+    const PsTiff::Byte_t *p0=p;
 
     while(p<p0+n) {
-        if(std::string((char*)p,4)!="8BIM")
-            throw std::runtime_error("expected '8BIM' signature");
 
-        
-        uint16_t     id  = ((uint16_t) *(p+4) << 8 | *(p+5));
-        std::string name= std::string((char*)p+7,(int)*(p+6));
-        
-        os << std::setw(4) << std::setfill('0')
-           << PsTiff::ImageResourceId(id).ToString() <<  "] '" << name << "'";
-        
-        p += name.length() & 0x1 != 0x0 ? 7+name.length(): 8+name.length();
+        PsTiff::ImageResource r(p);
 
-        uint32_t s = (uint32_t)*(p+0) << 24 |(uint32_t)*(p+1)<<16
-            | (uint32_t)*(p+2) <<  8 |(uint32_t)*(p+3)<<0;
-        
-        os << "[" << s << "]" << std::endl;
-        
-        os << PsTiff::IO::hex_dump(std::string( (char*) (p+sizeof(uint32_t)),s)) << std::endl;
-        
-        p+=sizeof(uint32_t) + ((s & 0x1) == 0 ? s : s+1);
-        
+        std::cerr << " ** {{" << r << "}}" << std::endl
+                  << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size())
+                  << std::endl;
 
-        os << "*******************************************"   << std::endl;
+
+        os << "*******************************************"   << std::endl
+           << PsTiff::IO::hex_dump(p,r.get_size())
+           << std::endl;
+        p += r.get_size();
     }
     
     if(p-p0 != n) {
@@ -168,6 +159,7 @@ int main(int argc, char* argv[]) {
                           << std::endl;
             }
 #endif
+
         }
         n++;
     } while (TIFFReadDirectory(in));

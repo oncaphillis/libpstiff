@@ -23,10 +23,12 @@ Ids  stored in the private "Photoshop" TIFF TAG.
 The  ultimate target is to  generate TIFFs  with additional spot color
 channels which are properly interpreted by Photoshop.
 
-Changes do far:
+Changes so far:
 
 * pstiff_tool  parses  thru the Image   Resource  Blocks and dumps out
   minimal information for each ID it finds.
 
+* Give information about  the  SpotColors associated with the   custom
+  color spaces.
  
 Sebastian Kloska (oncaphillis@snafu.de)

@@ -25,7 +25,7 @@
 
 namespace PsTiff
 {
-    const ImageResourceId::Map_t & ImageResourceId::GetMap()
+    const ResourceId::Map_t & ResourceId::GetMap()
     {
         static const struct Node_t _array[]={
             // (Obsolete--Photoshop 2.0 only ) Contains five 2-byte values: number of channels, rows, columns, depth, and mode
@@ -247,7 +247,7 @@ namespace PsTiff
         return m;
     }
 
-    const ImageResourceId::Names_t & ImageResourceId::GetNames()
+    const ResourceId::Names_t & ResourceId::GetNames()
     {
         static Names_t n;
         static const NameNode_t a[] ={
@@ -292,7 +292,7 @@ namespace PsTiff
         return n;
     }
  
-    std::string ImageResourceId::ToString() const {
+    std::string ResourceId::ToString() const {
         std::stringstream ss;
         Names_t::const_iterator i=GetNames().find(_e);
         ss << "(N=" << _n << "::E=" << (int)_e << ")'";

@@ -14,6 +14,8 @@ set(pstiff_SRCS
   pstiff_image_resource.cpp
   pstiff_image_resource_id.cpp
   pstiff.h
+  pstiff/Resource.h
+  pstiff/ResourceId.h
   pstiff/io/to_hex.h
 )
 

@@ -22,6 +22,7 @@
 
 #include "tiffio.h"
 #include "pstiff.h"
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <set>
@@ -81,16 +82,21 @@ void ParsePhotoshop(const PsTiff::Byte_t * p,int n,std::ostream &os=std::cout) {
 
     while(p<p0+n) {
 
-        PsTiff::ImageResource r(p);
+        PsTiff::Resource r(p);
 
-        std::cerr << " ** {{" << r << "}}" << std::endl
-                  << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size())
-                  << std::endl;
+        if(r.get_id()==PsTiff::ResourceId::AlternateSpotColors) {
+            os << " -- " << PsTiff::SpotColorResource(p) << std::endl
+                << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size())
+                << std::endl;
 
+        }
+        else {
+            std::cerr << " ** {{" << r << "}}" << std::endl
+                      << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size())
+                      << std::endl;
 
-        os << "*******************************************"   << std::endl
-           << PsTiff::IO::hex_dump(p,r.get_size())
-           << std::endl;
+            os << "*******************************************"   << std::endl;
+        }
         p += r.get_size();
     }
     

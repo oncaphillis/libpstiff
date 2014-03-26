@@ -1,6 +1,6 @@
 //========================================================================
 //
-// pstiff.h
+// pstiff/Types.h
 //
 // Copyright 2014 Sebastian Kloska (oncaphillis@snafu.de)
 //
@@ -20,17 +20,25 @@
 //
 //========================================================================
 
-#ifndef PSTIFF_H
-#define PSTIFF_H
+#ifndef PSTIFF_TYPES_H
+#define TYPES_H
 
-#include "pstiff/Resource.h"
-
-#include <stdint.h> 
-
-#include <map>
-#include <string>
-#include <sstream>
+#include <stdint.h>
 #include <stdexcept>
 
+namespace PsTiff {
+    typedef unsigned char Byte_t;
 
-#endif // PSTIFF_H
+    inline
+    uint16_t to16(const Byte_t * p) {
+        return (uint16_t)p[0] << 8 | (uint16_t)p[1];
+    }
+
+    inline
+    uint32_t to32(const Byte_t * p) {
+        return (uint32_t)p[0] << 24 | (uint32_t)p[1] << 16 |
+               (uint32_t)p[2] << 16 | (uint32_t)p[3] << 0;
+    }
+}
+
+#endif // PSTIFF_TYPES_H

@@ -52,7 +52,7 @@ namespace PsTiff {
             UnicodeAlphaNames,
             GlobalAltitude,
             Slices,
-            AlphaIndentifiers,
+            AlphaIdentifiers,
             UrlList,
             VersionInfo,
             PrintScale,

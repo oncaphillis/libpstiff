@@ -85,18 +85,21 @@ void ParsePhotoshop(const PsTiff::Byte_t * p,int n,std::ostream &os=std::cout) {
         PsTiff::Resource r(p);
 
         if(r.get_id()==PsTiff::ResourceId::AlternateSpotColors) {
-            os << " -- " << PsTiff::SpotColorResource(p) << std::endl
-                << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size())
-                << std::endl;
-
+            os << " -A " << PsTiff::SpotColorResource(p) << std::endl;
+        } else if(r.get_id()==PsTiff::ResourceId::AlphaNames) {
+            os << " -B " << PsTiff::AlphaNamesResource(p) << std::endl;
+        } else if(r.get_id()==PsTiff::ResourceId::UnicodeAlphaNames) {
+            os << " -C " << PsTiff::UnicodeAlphaNamesResource(p) << std::endl;
+        } else if(r.get_id()==PsTiff::ResourceId::AlphaIdentifiers) {
+            os << " -D " << PsTiff::AlphaIdentifiersResource(p) << std::endl;
+        } else {
+#if 0
+            os << " ** {{" << r << "}}" << std::endl
+               << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size())
+               << std::endl;
+#endif
         }
-        else {
-            std::cerr << " ** {{" << r << "}}" << std::endl
-                      << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size())
-                      << std::endl;
-
-            os << "*******************************************"   << std::endl;
-        }
+        os << "*******************************************"   << std::endl;
         p += r.get_size();
     }
     

@@ -141,7 +141,7 @@ namespace PsTiff
             // then next is a Boolean for the dirty flag; otherwise it's a 4 byte entry for the mod date.
             {Unsupported,{ 1052, 1052}},
             //(Photoshop 6.0) Alpha Identifiers. 4 bytes of length, followed by 4 bytes each for every alpha identifier.
-            {AlphaIndentifiers,{ 1053, 1053}},
+            {AlphaIdentifiers,{ 1053, 1053}},
             //(Photoshop 6.0) URL List. 4 byte count of URLs,
             // followed by 4 byte long, 4 byte ID, and Unicode string for each count.
             {UrlList,{ 1054, 1054}},
@@ -269,7 +269,7 @@ namespace PsTiff
             {UnicodeAlphaNames,"UnicodeAlphaNames"},
             {GlobalAltitude,"GlobalAltitude"},
             {Slices,"Slices"},
-            {AlphaIndentifiers,"AlphaIndentifiers"},
+            {AlphaIdentifiers,"AlphaIndentifiers"},
             {UrlList,"UrlList"},
             {VersionInfo,"VersionInfo"},
             {PrintScale,"PrintScale"},

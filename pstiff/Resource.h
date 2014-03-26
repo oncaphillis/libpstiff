@@ -27,6 +27,7 @@
 #include "pstiff/io/hex_dump.h"
 
 #include <vector>
+#include <iostream>
 
 namespace PsTiff
 {
@@ -176,7 +177,112 @@ namespace PsTiff
         for(int i=0;i<r.get_count();i++) {
             os << "[" << r[i] << "]";
         }
+        os << std::endl;
+        os << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size());
         return os;
+    }
+
+    template<class CI,class CE>
+    class BasicAlphaNamesResource : public Resource {
+    private:
+        typedef Resource super;
+    public:
+        typedef std::basic_string<CI> String_t;
+        typedef CI                    Char_t;
+        BasicAlphaNamesResource(const Byte_t * p) : super(p) {
+
+        }
+
+        const String_t & operator[](size_t idx) const {
+            if(idx>=_c.size())
+                throw std::runtime_error("illegal idx");
+            return _c[idx];
+         }
+
+        String_t & operator[](size_t i) {
+            if(i>=_c.size())
+                throw std::runtime_error("illegal idx");
+            return _c[i];
+        }
+
+        void clear() {
+            _c.clear();
+        }
+
+        void push_back(const String_t & s) {
+            _c.push_back(s);
+        }
+
+        size_t size() const {
+            return _c.size();
+        }
+
+    private:
+        std::vector<String_t> _c;
+    };
+
+    template<class CI,class CE>
+    inline
+    std::ostream & operator<<(std::ostream &os,const BasicAlphaNamesResource<CI,CE> & r ) {
+        os << "[ALPHANAMES] (";
+        for(int i=0;i<r.size();i++) {
+            os << ( i==0 ? "" : ";") << r[i];
+        }
+        return os << ")";
+    }
+
+    template<>
+    inline
+    std::ostream & operator<< <wchar_t,uint16_t> (std::ostream &os,const BasicAlphaNamesResource<wchar_t,uint16_t> & r ) {
+        os << "[ALPHANAMES] (";
+        for(int i=0;i<r.size();i++) {
+        //    os << ( i==0 ? "" : ";") << r[i];
+        }
+        return os;
+    }
+
+    class  AlphaNamesResource : public BasicAlphaNamesResource<char,char> {
+    private:
+        typedef BasicAlphaNamesResource<char,char> super;
+    public:
+        AlphaNamesResource(const Byte_t * p) : super(p) {
+            clear();
+            String_t s;
+            if(get_id()!=ResourceId::AlphaNames)
+                throw std::runtime_error("Expected AlphaNames Resource Id");
+
+            const Byte_t *p0;
+            const Byte_t *p1;
+            if((p1=p0=get_data())!=NULL) {
+                Byte_t  n = 0;
+                while((p1+sizeof(uint16_t)-p0)<get_data_size() && (n=to8(p1)))
+                {
+                    push_back(String_t((Char_t*)(p1+sizeof(Byte_t)),(int)n));
+                    p1+=sizeof(Byte_t)+n;
+                }
+            }
+            if(p1-p0!=get_data_size()) {
+                std::stringstream ss;
+                ss << "expected " << get_data_size() << " bytes; found " << (p1-p1) << std::endl;
+            }
+        }
+    };
+
+    typedef BasicAlphaNamesResource<wchar_t,uint16_t> UnicodeAlphaNamesResource;
+
+    class AlphaIdentifiersResource : public Resource {
+    private:
+        typedef Resource super;
+    public:
+        AlphaIdentifiersResource(const Byte_t * p) : super(p) {
+
+        }
+    private:
+    };
+
+    inline
+    std::ostream & operator<<(std::ostream & os,const AlphaIdentifiersResource & r) {
+        return os << "[ALPHAIDS]" << std::endl << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size()) << std::endl;
     }
 }
 

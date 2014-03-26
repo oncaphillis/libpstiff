@@ -29,6 +29,11 @@
 namespace PsTiff {
     typedef unsigned char Byte_t;
 
+    inline Byte_t  to8(const Byte_t *p) {
+        return *p;
+    }
+
+
     inline
     uint16_t to16(const Byte_t * p) {
         return (uint16_t)p[0] << 8 | (uint16_t)p[1];

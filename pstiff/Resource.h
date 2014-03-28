@@ -224,7 +224,7 @@ namespace PsTiff
     template<class CI,class CE>
     inline
     std::ostream & operator<<(std::ostream &os,const BasicAlphaNamesResource<CI,CE> & r ) {
-        os << "[ALPHANAMES] [" << r.size() << "](";
+        os << "[ALPHANAMES](";
         for(int i=0;i<r.size();i++) {
             os << ( i==0 ? "" : ";") << r[i];
         }
@@ -235,7 +235,7 @@ namespace PsTiff
     inline
     std::ostream & operator<< <wchar_t,uint16_t> (std::ostream &os,
                                                   const BasicAlphaNamesResource<wchar_t,uint16_t> & r ) {
-        os << "[UALPHANAMES] [" << r.size() << "](";
+        os << "[UALPHANAMES](";
         for(int i=0;i<r.size();i++) {
             os << ( i==0 ? "" : ";") << PsTiff::Tools::from_wstring(r[i]);
         }
@@ -312,17 +312,55 @@ namespace PsTiff
     private:
         typedef Resource super;
     public:
-        AlphaIdentifiersResource(const Byte_t * p) : super(p) {
 
+        AlphaIdentifiersResource(const Byte_t * p) : super(p) {
+            if(get_id()!=ResourceId::AlphaIdentifiers)
+                throw std::runtime_error("Expected AlphaChannelIds");
+            if((get_data_size() % sizeof(uint32_t))!=0)
+                throw std::runtime_error("Illegal size of AlphaChannelIdsResource");
+
+            for(int i=0;i<get_data_size() / sizeof(uint32_t);i++)
+            {
+                push_back(to32(get_data()+i*sizeof(uint32_t)));
+            }
         }
+
+        void push_back(uint32_t n) {
+            _c.push_back(n);
+        }
+
+        size_t size() const {
+            return _c.size();
+        }
+
+        const uint32_t & operator[](size_t idx) const {
+            if(idx<0 || idx>=_c.size()) {
+                throw std::runtime_error("access to illegal idx");
+
+            }
+            return _c[idx];
+        }
+
+        uint32_t & operator[](size_t idx) {
+            if(idx<0 || idx>=_c.size()) {
+                throw std::runtime_error("access to illegal idx");
+
+            }
+            return _c[idx];
+        }
+
     private:
+        std::vector<uint32_t> _c;
     };
 
     inline
     std::ostream & operator<<(std::ostream & os,const AlphaIdentifiersResource & r) {
-        return os << "[ALPHAIDS]" << std::endl << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size()) << std::endl;
+        os << "[ALPHAIDS](";
+        for(int i=0;i<r.size();i++) {
+            os << (i==0 ? "" : ";") << r[i];
+        }
+        return os << ")";
     }
 }
-
 
 #endif // PSTIFF_RESOURCE_H

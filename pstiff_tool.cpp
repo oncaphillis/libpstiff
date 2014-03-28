@@ -92,6 +92,8 @@ void ParsePhotoshop(const PsTiff::Byte_t * p,int n,std::ostream &os=std::cout) {
             os << " -C " << PsTiff::UnicodeAlphaNamesResource(p) << std::endl;
         } else if(r.get_id()==PsTiff::ResourceId::AlphaIdentifiers) {
             os << " -D " << PsTiff::AlphaIdentifiersResource(p) << std::endl;
+        } else if(r.get_id()==PsTiff::ResourceId::AlphaIdentifiers) {
+            os << " -E " << PsTiff::AlphaIdentifiersResource(p) << std::endl;
         } else {
 #if 0
             os << " ** {{" << r << "}}" << std::endl
@@ -99,7 +101,6 @@ void ParsePhotoshop(const PsTiff::Byte_t * p,int n,std::ostream &os=std::cout) {
                << std::endl;
 #endif
         }
-        os << "*******************************************"   << std::endl;
         p += r.get_size();
     }
     

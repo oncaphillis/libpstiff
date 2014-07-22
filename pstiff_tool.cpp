@@ -32,6 +32,7 @@
 #include <string>
 #include <stdexcept>
 #include <pstiff/io/hex_dump.h>
+#include <getopt.h>
 
 #define TIFFTAG_PHOTOSHOP_DDB 37724
 
@@ -76,14 +77,14 @@ void _Error(const char* module, const char* fmt, va_list ap)
 typedef unsigned char byte_t;
 
 
-void ParsePhotoshop(const PsTiff::Byte_t * p,int n,std::ostream &os=std::cout) {
+void ParsePhotoshop(const PsTiff::Byte_t * p,int n,bool raw=false,std::ostream &os=std::cout) {
 
     const PsTiff::Byte_t *p0=p;
 
     while(p<p0+n) {
 
         PsTiff::Resource r(p);
-
+        bool dumped = false;
         if(r.get_id()==PsTiff::ResourceId::AlternateSpotColors) {
             os << " -A " << PsTiff::SpotColorResource(p) << std::endl;
         } else if(r.get_id()==PsTiff::ResourceId::AlphaNames) {
@@ -94,13 +95,18 @@ void ParsePhotoshop(const PsTiff::Byte_t * p,int n,std::ostream &os=std::cout) {
             os << " -D " << PsTiff::AlphaIdentifiersResource(p) << std::endl;
         } else if(r.get_id()==PsTiff::ResourceId::AlphaIdentifiers) {
             os << " -E " << PsTiff::AlphaIdentifiersResource(p) << std::endl;
-        } else {
-#if 0
-            os << " ** {{" << r << "}}" << std::endl
-               << PsTiff::IO::hex_dump(r.get_data(),r.get_data_size())
+        } else if(r.get_id() == PsTiff::ResourceId::VersionInfo) {
+            os << " -V " << PsTiff::VersionInfoResource(p) << std::endl;
+        } else if(raw) {
+            dumped = true;
+            os << " -? '"<< r.get_name() << "'::0x" << std::hex << std::setfill('0') << std::setw(4)
+               << r.get_id() << std::dec << std::endl
+               << PsTiff::IO::hex_dump(r.get_data(),r.get_raw_size())
                << std::endl;
-#endif
         }
+        if(!dumped && raw)
+            os << PsTiff::IO::hex_dump(r.get_data(),r.get_raw_size()) << std::endl;
+
         p += r.get_size();
     }
     
@@ -128,18 +134,52 @@ void ParsePhotoshopDDB(const byte_t * p,int n,std::ostream &os=std::cout) {
 }
 
 
-static const std::string Usage = "Usage: pstiff_dump tiff-file";
+static const std::string Usage = "Usage: [--raw] pstiff_dump tiff-file";
 
 int main(int argc, char* argv[]) {
     TIFF *in, *out;
 
+    bool raw=false;
+
+    while(true) {
+        static struct option lo[] = {
+            {"verbose", no_argument,       0,  'v' },
+            {"raw",     no_argument,       0,  'r' },
+            {0,         0,                 0,  0 }
+        };
+
+        int oidx;
+        int c = ::getopt_long(argc, argv, "vr", lo, &oidx);
+
+        if (c == -1)
+            break;
+
+        switch(c) {
+
+        case 'r':
+            raw=true;
+        case 'v':
+            std::cerr << "option '" << c << "'" << std::endl;
+            break;
+
+        default:
+            std::cerr << " ?? getopt returned character code 0x" << std::hex << (int)c << std::endl;
+            std::cerr << Usage << std::endl;
+            ::exit(1);
+            break;
+        }
+    }
+
     TIFFSetErrorHandler(_Error);
     TIFFSetWarningHandler(_Warning);
 
-    if(argc!=2)
+
+    std::cerr << argc - optind << std::endl;
+
+    if(argc!=1)
         std::cerr << Usage << std::endl;
     
-    if((in = TIFFOpen(argv[1], "r"))==NULL)
+    if((in = TIFFOpen(argv[optind], "r"))==NULL)
     {
         std::cerr << "Unable to open '" << argv[1] << "'" << std::endl;
         ::exit(1);
@@ -153,7 +193,7 @@ int main(int argc, char* argv[]) {
             byte_t *data;
 
             if(TIFFGetField(in,TIFFTAG_PHOTOSHOP,&n,&data)==1) {
-                ParsePhotoshop(data,n,std::cout);
+                ParsePhotoshop(data,n,raw,std::cout);
             }
 #if 0
             if(TIFFGetField(in,TIFFTAG_PHOTOSHOP_DDB,&n,&data)==1) {

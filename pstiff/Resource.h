@@ -36,6 +36,10 @@ namespace PsTiff
     public:
         typedef ResourceId Id_t;
 
+        Resource(const std::string & n,Id_t id) : _p(NULL),_name(n),_size(0),_id(id)
+        {
+        }
+
         Resource(const Byte_t * p=NULL) : _p(p),_size(0),_id(0) {
             if(p!=NULL)   {
                 if(std::string((char*)p,4)!="8BIM")
@@ -54,7 +58,7 @@ namespace PsTiff
 
         uint32_t get_size() const {
             if(_p!=NULL)    {
-                return 4 + sizeof(uint16_t) + (_name.length() & 0x1 ? _name.length()+1 : _name.length() + 2  ) + sizeof(uint32_t) + ( (get_data_size() & 0x1) == 0 ? get_data_size() : get_data_size()+1);
+                return 4 + sizeof(uint16_t) + (_name.length() & 0x1 ? _name.length()+1 : _name.length() + 2  ) + sizeof(uint32_t) + ( (get_raw_size() & 0x1) == 0 ? get_raw_size() : get_raw_size()+1);
             }
             return 0;
         }
@@ -63,6 +67,7 @@ namespace PsTiff
             return _id;
         }
 
+        virtual
         const Byte_t *  get_data() const {
             if(_p!=NULL) {
                 return _p+4+sizeof(uint16_t)+(_name.length() & 0x1 ? _name.length()+1 : _name.length() + 2) + sizeof(uint32_t);
@@ -74,7 +79,8 @@ namespace PsTiff
             return _name;
         }
 
-        uint32_t get_data_size() const {
+        virtual
+        uint32_t get_raw_size() const {
             return _size;
         }
 
@@ -87,7 +93,7 @@ namespace PsTiff
 
     inline
     std::ostream & operator<<(std::ostream & os,const Resource & r) {
-        return os << "[" << r.get_id() << "(" << "'" << r.get_name() << "') " << r.get_data_size() << "/" << r.get_size() << "] ";
+        return os << "[" << r.get_id() << "(" << "'" << r.get_name() << "') " << r.get_raw_size() << "/" << r.get_size() << "] ";
     }
 
     class SpotColorResource : public Resource
@@ -127,11 +133,11 @@ namespace PsTiff
             _v = to16(get_data()+0);
             _s = to16(get_data()+2);
 
-            if(get_data_size()!=_s*14+4)
+            if(get_raw_size()!=_s*14+4)
             {
                 std::stringstream ss;
                 ss << "expected data of SpotColorResources to have size" << _s*14+4
-                      << " but found " << get_data_size();
+                      << " but found " << get_raw_size();
                 throw std::runtime_error(ss.str());
             }
             const Byte_t * pp=get_data()+4;
@@ -256,15 +262,15 @@ namespace PsTiff
             const Byte_t *p1;
             if((p1=p0=get_data())!=NULL) {
                 Byte_t  n = 0;
-                while((p1+sizeof(uint16_t)-p0)<get_data_size() && (n=to8(p1)))
+                while((p1+sizeof(uint16_t)-p0)<get_raw_size() && (n=to8(p1)))
                 {
                     push_back(String_t((Char_t*)(p1+sizeof(Byte_t)),(int)n));
                     p1+=sizeof(Byte_t)+n;
                 }
             }
-            if(p1-p0!=get_data_size()) {
+            if(p1-p0!=get_raw_size()) {
                 std::stringstream ss;
-                ss << "expected " << get_data_size() << " bytes; found " << (p1-p1) << std::endl;
+                ss << "expected " << get_raw_size() << " bytes; found " << (p1-p1) << std::endl;
             }
         }
     };
@@ -284,7 +290,7 @@ namespace PsTiff
             const Byte_t *p1;
 
             if((p1=p0=get_data())!=NULL) {
-                while(((p1+sizeof(uint32_t)-p0)<get_data_size()))
+                while(((p1+sizeof(uint32_t)-p0)<get_raw_size()))
                 {
                     String_t w;
                     uint32_t  n = to32(p1);
@@ -301,9 +307,9 @@ namespace PsTiff
                 }
             }
 
-            if(p1-p0!=get_data_size()) {
+            if(p1-p0!=get_raw_size()) {
                 std::stringstream ss;
-                ss << "expected " << get_data_size() << " bytes; found " << (p1-p1) << std::endl;
+                ss << "expected " << get_raw_size() << " bytes; found " << (p1-p1) << std::endl;
             }
         }
     };
@@ -312,14 +318,18 @@ namespace PsTiff
     private:
         typedef Resource super;
     public:
+        // Not initilized from a TIFF file
+        AlphaIdentifiersResource() : super("Alpha",2) {
+
+        }
 
         AlphaIdentifiersResource(const Byte_t * p) : super(p) {
             if(get_id()!=ResourceId::AlphaIdentifiers)
                 throw std::runtime_error("Expected AlphaChannelIds");
-            if((get_data_size() % sizeof(uint32_t))!=0)
+            if((get_raw_size() % sizeof(uint32_t))!=0)
                 throw std::runtime_error("Illegal size of AlphaChannelIdsResource");
 
-            for(int i=0;i<get_data_size() / sizeof(uint32_t);i++)
+            for(int i=0;i<get_raw_size() / sizeof(uint32_t);i++)
             {
                 push_back(to32(get_data()+i*sizeof(uint32_t)));
             }
@@ -355,11 +365,80 @@ namespace PsTiff
 
     inline
     std::ostream & operator<<(std::ostream & os,const AlphaIdentifiersResource & r) {
-        os << "[ALPHAIDS](";
+        os << "[ALPHAIDS](" << r.get_name() << ")::" ;
         for(int i=0;i<r.size();i++) {
             os << (i==0 ? "" : ";") << r[i];
         }
         return os << ")";
+    }
+
+    class VersionInfoResource : public Resource {
+    private:
+        typedef Resource super;
+    public:
+        VersionInfoResource(const Byte_t * p) : super(p),_v(0),_has_merged_data(false) {
+            if(get_id()!=ResourceId::VersionInfo) {
+                throw std::runtime_error("Expected VersionInfoId");
+            }
+
+            if(get_size()<5)
+                throw  std::runtime_error("VersionInfoResource has to have a size of min 5");
+
+            _v = to32(get_data()+0);
+            _has_merged_data = *(get_data()+4) != 0x00;
+
+            int s0 = to32(get_data()+5);
+
+            std::cerr << "[" << s0 << "]" << std::endl;
+
+            {
+                std::wstring ws;
+                for(int i=0;i<s0;i++)
+                    ws+=wchar_t(to16(get_data()+9+i*2));
+                _reader_name=ws;
+            }
+
+            int s1 = to32(get_data()+9+s0*2);
+            std::cerr << "[" << s1 << "]" << std::endl;
+
+            {
+                std::wstring ws;
+                for(int i=0;i<s1;i++)
+                    ws+=wchar_t(to16(get_data()+13+s0*2+i*2));
+                _writer_name=ws;
+            }
+            std::cerr << " ****** " << get_size() << std::endl;
+        }
+
+        uint32_t get_version() const {
+            return _v;
+        }
+
+        bool has_merged_data() const {
+            return _has_merged_data;
+        }
+
+        std::wstring get_reader_name() const {
+            return _reader_name;
+        }
+
+        std::wstring get_writer_name() const {
+            return _writer_name;
+        }
+
+    private:
+        bool     _has_merged_data;
+        uint32_t _v;
+        std::wstring _reader_name;
+        std::wstring _writer_name;
+    };
+
+    inline
+    std::ostream & operator<<(std::ostream & os,const VersionInfoResource & r) {
+        return os << "[VERSION]" << r.get_version() << "; has_merged_data="
+                  << r.has_merged_data()
+                  << "; reader = " << PsTiff::Tools::from_wstring(r.get_reader_name())
+                  << ";writer =" << PsTiff::Tools::from_wstring(r.get_writer_name());
     }
 }
 

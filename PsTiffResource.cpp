@@ -1,30 +1,29 @@
 //========================================================================
 //
-// pstiff_image_resource_id.cpp
-//
 // Copyright 2014 Sebastian Kloska (oncaphillis@snafu.de)
 //
 // PSTIFF is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
-// 
+//
 // AGG is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
-// along with AGG; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// along with PSTIFF; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 //
 //========================================================================
 
-#include "pstiff.h"
+#include <pstiff/ResourceList.h>
 #include <sstream>
 
 namespace PsTiff
 {
+
     const ResourceId::Map_t & ResourceId::GetMap()
     {
         static const struct Node_t _array[]={
@@ -39,7 +38,7 @@ namespace PsTiff
             // Names of the alpha channels as a series of Pascal strings.
             {AlphaNames,{ 1006, 1006}},
             // (Obsolete) See ID 1077 DisplayInfo structure. See Appendix A in Photoshop API Guide.pdf.
-            {Unsupported,{ 1007, 1007}},
+            {DisplayInfo,{ 1007, 1007}},
             // The caption as a Pascal string.
             {Unsupported,{ 1008, 1008}},
             // Border information. Contains a fixed number (2 bytes real, 2 bytes fraction) for the border width,
@@ -249,47 +248,48 @@ namespace PsTiff
 
     const ResourceId::Names_t & ResourceId::GetNames()
     {
-        static Names_t n;
-        static const NameNode_t a[] ={
-            {Unsupported,"Unsupported"},
-            {ResolutionInfo,"ResolutionInfo"},
-            {AlphaNames,"AlphaNames"},
-            {PageSetupBools,"PageSetupBools"},
-            {HalftoneInformation,"HalftoneInformation"},
-            {ColorTransferFunctions,"ColorTransferFunctions"},
-            {LayerStateInformation,"LayerStateInformation"},
-            {LayersGroupInformation,"LayersGroupInformation"},
-            {GridAndGuideInformation,"GridAndGuideInformation"},
-            {CopyrightFlag,"CopyrightFlag"},
-            {ThumbnailResource,"ThumbnailResource"},
-            {GlobaleAngle,"GlobaleAngle"},
-            {IccUntaggedProfile,"IccUntaggedProfile"},
-            {SpotHalftone,"SpotHalftone"},
-            {IdSeedNumber,"IdSeedNumber"},
-            {UnicodeAlphaNames,"UnicodeAlphaNames"},
-            {GlobalAltitude,"GlobalAltitude"},
-            {Slices,"Slices"},
-            {AlphaIdentifiers,"AlphaIndentifiers"},
-            {UrlList,"UrlList"},
-            {VersionInfo,"VersionInfo"},
-            {PrintScale,"PrintScale"},
-            {PixelAspectRatio,"PixelAspectRatio"},
-            {AlternateSpotColors,"AlternateSpotColors"},
-            {LayerSelectionIds,"LayerSelectionIds"},
-            {LayerGroupsEnabled,"LayerGroupsEnabled"},
-            {PluginResources,"PluginResources"},
-            {PrintFlags,"PrintFlags"},
-            {Iptc,"Iptc"},
-            {CaptionDigest,"CaptionDigest"},
-            {PathInformation,"PathInformation"},
-            {PrintInformation,"PrintInformation"},
-            {PrintStyle,"PrintStyle"}
-        };
+       static Names_t n;
+       static const ResourceId::NameNode_t nn[] ={
+           {Unsupported,"Unsupported"},
+           {ResolutionInfo,"ResolutionInfo"},
+           {AlphaNames,"AlphaNames"},
+           {PageSetupBools,"PageSetupBools"},
+           {HalftoneInformation,"HalftoneInformation"},
+           {ColorTransferFunctions,"ColorTransferFunctions"},
+           {DisplayInfo,"DisplayInfo"},
+           {LayerStateInformation,"LayerStateInformation"},
+           {LayersGroupInformation,"LayersGroupInformation"},
+           {GridAndGuideInformation,"GridAndGuideInformation"},
+           {CopyrightFlag,"CopyrightFlag"},
+           {ThumbnailResource,"ThumbnailResource"},
+           {GlobaleAngle,"GlobaleAngle"},
+           {IccUntaggedProfile,"IccUntaggedProfile"},
+           {SpotHalftone,"SpotHalftone"},
+           {IdSeedNumber,"IdSeedNumber"},
+           {UnicodeAlphaNames,"UnicodeAlphaNames"},
+           {GlobalAltitude,"GlobalAltitude"},
+           {Slices,"Slices"},
+           {AlphaIdentifiers,"AlphaIndentifiers"},
+           {UrlList,"UrlList"},
+           {VersionInfo,"VersionInfo"},
+           {PrintScale,"PrintScale"},
+           {PixelAspectRatio,"PixelAspectRatio"},
+           {AlternateSpotColors,"AlternateSpotColors"},
+           {LayerSelectionIds,"LayerSelectionIds"},
+           {LayerGroupsEnabled,"LayerGroupsEnabled"},
+           {PluginResources,"PluginResources"},
+           {PrintFlags,"PrintFlags"},
+           {Iptc,"Iptc"},
+           {CaptionDigest,"CaptionDigest"},
+           {PathInformation,"PathInformation"},
+           {PrintInformation,"PrintInformation"},
+           {PrintStyle,"PrintStyle"}
+       };
 
-        if(n.empty()) {
-            BuildNames(a,n);
-        }
-        return n;
+       if(n.empty()) {
+            BuildNames(nn,n);
+       }
+       return n;
     }
  
     std::string ResourceId::ToString() const {

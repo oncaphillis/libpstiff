@@ -1,7 +1,5 @@
 //========================================================================
 //
-// pstiff/ResourceId.h
-//
 // Copyright 2014 Sebastian Kloska (oncaphillis@snafu.de)
 //
 // PSTIFF is free software; you can redistribute it and/or
@@ -15,7 +13,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with AGG; if not, write to the Free Software
+// along with PSTIFF; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 //
 //========================================================================
@@ -40,6 +38,7 @@ namespace PsTiff {
             PageSetupBools,
             HalftoneInformation,
             ColorTransferFunctions,
+            DisplayInfo,
             LayerStateInformation,
             LayersGroupInformation,
             GridAndGuideInformation,
@@ -71,6 +70,11 @@ namespace PsTiff {
         struct Range_t {
             int from;
             int to;
+
+            operator const void * () const {
+               return (from==-1 || to==-1 ? NULL : this);
+            }
+
             bool operator<(const Range_t &r) const {
                 if(from>to || r.from>r.to)
                 {
@@ -93,8 +97,56 @@ namespace PsTiff {
             const char *name;
         };
 
-        typedef std::map<Range_t,Enum_t>      Map_t;
-        typedef std::map<Enum_t,std::string> Names_t;
+        class Map_t {
+        private:
+            typedef std::map<Range_t,Enum_t>       FMap_t;
+            typedef std::map<Enum_t,Range_t>       BMap_t;
+        public:
+
+            typedef FMap_t::const_iterator const_iterator;
+            typedef BMap_t::const_iterator b_const_iterator;
+
+            void clear() {
+                _f.clear();
+                _b.clear();
+            }
+
+
+            bool empty() const {
+                return _f.empty() && _b.empty();
+            }
+
+            const_iterator find(int n) const {
+                Range_t r {n,n};
+                return _f.find(r);
+            }
+
+            const_iterator end() const {
+                return _f.end();
+            }
+
+            b_const_iterator b_find(Enum_t e) const {
+                return _b.find(e);
+            }
+
+            b_const_iterator b_end() const {
+                return _b.end();
+            }
+
+            FMap_t::mapped_type & operator[](const Range_t & r ) {
+                return _f[r];
+            }
+
+            BMap_t::mapped_type & operator[](const Enum_t & e ) {
+                return _b[e];
+            }
+
+            private:
+                FMap_t _f;
+                BMap_t _b;
+        };
+
+        typedef std::map<Enum_t,std::string>   Names_t;
 
         template<class NODE,int N>
         static void BuildNames(const NODE (&a)[N], Names_t & n)
@@ -117,6 +169,7 @@ namespace PsTiff {
                     throw std::runtime_error(ss.str());
                 }
                 m[ a[i]._r ] = a[i]._e;
+                m[ a[i]._e ] = a[i]._r;
             }
         }
 
@@ -134,16 +187,26 @@ namespace PsTiff {
         }
 
         static Enum_t to_enum(int n) {
-            Range_t r = {
-                n,n
-            };
+            Map_t::const_iterator i=GetMap().find(n);
 
-            Map_t::const_iterator i=GetMap().find(r);
             if(i==GetMap().end())
             {
                 return Unknown;
             }
             return (*i).second;
+        }
+
+        static Range_t to_range(const Enum_t & e) {
+            Map_t::b_const_iterator i=GetMap().b_find(e);
+            if(i==GetMap().b_end())
+            {
+                return Range_t();
+            }
+            return (*i).second;
+        }
+
+        Range_t to_range() const {
+            return to_range(_e);
         }
 
         bool operator==(const Enum_t & e) const {

@@ -10,14 +10,14 @@ INCLUDE_DIRECTORIES( "." )
 
 # libpstiff
 
-set(pstiff_SRCS 
-  pstiff_image_resource.cpp
-  pstiff_image_resource_id.cpp
-  pstiff.h
+set(pstiff_SRCS
+  PsTiffResource.cpp
   pstiff/Types.h
   pstiff/Resource.h
   pstiff/ResourceId.h
+  pstiff/ResourceList.h
   pstiff/io/to_hex.h
+  pstiff/io/hex_dump.h
 )
 
 add_library(pstiff SHARED ${pstiff_SRCS})

@@ -1,27 +1,25 @@
 //========================================================================
 //
-// pstiff_tool.cpp
-//
 // Copyright 2014 Sebastian Kloska (oncaphillis@snafu.de)
 //
 // PSTIFF is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
-// 
+//
 // AGG is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
-// along with AGG; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// along with PSTIFF; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 //
 //========================================================================
 
 #include "tiffio.h"
-#include "pstiff.h"
+#include "pstiff/Resource.h"
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -101,11 +99,11 @@ void ParsePhotoshop(const PsTiff::Byte_t * p,int n,bool raw=false,std::ostream &
             dumped = true;
             os << " -? '"<< r.get_name() << "'::0x" << std::hex << std::setfill('0') << std::setw(4)
                << r.get_id() << std::dec << std::endl
-               << PsTiff::IO::hex_dump(r.get_data(),r.get_raw_size())
+               << PsTiff::IO::hex_dump(r.get_data(),r.get_size())
                << std::endl;
         }
         if(!dumped && raw)
-            os << PsTiff::IO::hex_dump(r.get_data(),r.get_raw_size()) << std::endl;
+            os << PsTiff::IO::hex_dump(r.get_data(),r.get_size()) << std::endl;
 
         p += r.get_size();
     }
